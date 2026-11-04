@@ -140,93 +140,111 @@ body {
   height: var(--h);
   background: linear-gradient(
     to bottom,
-    var(--color-brand) 0%,
-    rgba(213, 0, 28, 0.55) 45%,
+    rgba(213, 0, 28, 0.85) 0%,
+    rgba(213, 0, 28, 0.35) 40%,
     rgba(213, 0, 28, 0) 100%
   );
   transform-origin: top center;
   opacity: 0;
-  animation: shooting-star var(--dur, 1.8s) cubic-bezier(0.12, 0.65, 0.3, 1) var(--delay, 0s) infinite;
+  animation: shooting-star var(--dur, 3.6s) cubic-bezier(0.25, 0.6, 0.35, 1) var(--delay, 0s) infinite;
 }
 
 @keyframes shooting-star {
   0% {
-    transform: translateY(var(--travel, 70px)) scaleY(0.35);
+    transform: translateY(var(--travel, 60px)) scaleY(0.3);
     opacity: 0;
   }
-  10% {
-    transform: translateY(calc(var(--travel, 70px) * 0.72)) scaleY(1);
-    opacity: 1;
+  18% {
+    transform: translateY(calc(var(--travel, 60px) * 0.65)) scaleY(1);
+    opacity: 0.9;
   }
   55% {
-    opacity: 1;
+    opacity: 0.8;
   }
-  82%,
+  85%,
   100% {
     /* Burn out: the head stays put while the tail shrinks away. */
-    transform: translateY(0) scaleY(0.2);
+    transform: translateY(0) scaleY(0.15);
     opacity: 0;
   }
 }
 
-/* Odometer reels ----------------------------------------------------------- */
+/* Cross-fading number -------------------------------------------------------- */
 
 .odometer {
   --digit-size: 44px;
+  --fade-duration: 1.4s;
   position: absolute;
   left: 18px;
-  bottom: 48px;
+  bottom: 70px;
   display: flex;
   align-items: flex-end;
-  padding: 0.85em 0;
   font-size: var(--digit-size);
-  font-weight: 300;
+  font-weight: 200;
   line-height: 1;
   letter-spacing: 0.02em;
   font-variant-numeric: tabular-nums;
-  /* Neighbouring digits above and below the current one fade out, like a slot reel. */
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.3) 24%,
-    #000 42%,
-    #000 58%,
-    rgba(0, 0, 0, 0.3) 76%,
-    transparent 100%
-  );
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgba(0, 0, 0, 0.3) 24%,
-    #000 42%,
-    #000 58%,
-    rgba(0, 0, 0, 0.3) 76%,
-    transparent 100%
-  );
+  color: #2b2b2b;
 }
 
-.reel {
+.counter {
   position: relative;
   display: inline-block;
-  width: 3em; /* overwritten with the measured width of the value */
+  width: 4em; /* overwritten with the measured width of the widest value */
   height: 1em;
-  overflow: visible;
+  text-align: right;
   white-space: nowrap;
 }
 
-.reel__strip {
+.counter__value {
   position: absolute;
-  left: 0;
+  right: 0;
   top: 0;
-  display: flex;
-  flex-direction: column;
-  will-change: transform;
-}
-
-.reel__row {
   display: block;
   height: 1em;
   line-height: 1;
+  opacity: 0;
+  will-change: opacity, transform, filter;
+}
+
+.counter__value.is-current {
+  opacity: 1;
+}
+
+/* Outgoing value drifts up and dissolves … */
+.counter__value.is-leaving {
+  animation: value-leave var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* … while the incoming one rises softly into place. */
+.counter__value.is-entering {
+  animation: value-enter var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes value-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.3em);
+    filter: blur(5px);
+  }
+}
+
+@keyframes value-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.3em);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 .odometer__unit {
@@ -238,22 +256,23 @@ body {
   color: var(--color-text-muted);
 }
 
-/* Settled: only the final digit remains, the ghost rows are clipped away. */
+/* Settled: the final number gets its full weight. */
 .is-settled .odometer {
-  mask-image: none;
-  -webkit-mask-image: none;
-}
-
-.is-settled .reel {
-  overflow: hidden;
+  color: var(--color-text);
+  transition: color 0.6s ease;
 }
 
 /* Reduced motion: static final number, bars drawn once. */
 @media (prefers-reduced-motion: reduce) {
   .bar {
     animation: none;
-    transform: scaleY(1);
-    opacity: 0.7;
+    transform: none;
+    opacity: 0.5;
+  }
+
+  .counter__value.is-leaving,
+  .counter__value.is-entering {
+    animation: none;
   }
 
   .teaser__cta {

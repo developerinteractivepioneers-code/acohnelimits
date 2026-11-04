@@ -5,27 +5,27 @@ waiting for the user to hit **Generate Driving Statistics**.
 
 ## Behaviour
 
-- **Idle** – every digit is a reel driven by an underdamped spring that keeps
-  re-targeting a random position around its final digit. Leading digits wander
-  little and slowly, trailing digits a lot and fast, so the number visibly
-  "searches" without settling. Neighbouring digits are shown as faded ghosts.
-- **Bars** – five thin bars grow upwards with a fading tail, each on its own
-  duration and phase (pure CSS keyframes).
-- **Generate** – reels spin to the final value from left to right with a small
-  overshoot, ghosts are clipped away, bars do one last rise and stay.
-- **Reduced motion** – with `prefers-reduced-motion: reduce` the final number is
-  rendered statically and the bars are drawn once.
-- The animation loop pauses while the card is off-screen.
+- **Idle** – the number softly cross-fades to a new random distance every few
+  seconds: the old value drifts up and blurs out while the new one rises into
+  place. Values are drawn log-uniformly from `data-min`…`data-max`, so three-,
+  four- and five-digit distances appear about equally often.
+- **Shooting stars** – thin red streaks appear low, rise slowly, decelerate
+  and burn out (pure CSS keyframes).
+- **Generate** – the counter fades to the final value from `data-value`.
+- **Reduced motion** – with `prefers-reduced-motion: reduce` the final number
+  is rendered statically and the streaks are drawn once.
+- Cycling pauses while the card is off-screen.
 
 ## Usage
 
 ```html
-<section class="teaser" data-teaser data-value="2168" data-unit="km">…</section>
+<section class="teaser" data-teaser data-value="2168" data-min="100" data-max="50000" data-unit="km">…</section>
 ```
 
-`data-value` is the final number (digits only, thousands separator is added),
-`data-unit` the unit label. See `index.html` for the full markup and
-`src/teaser.ts` for the component.
+`data-value` is the final number, `data-min`/`data-max` the range the idle
+values are drawn from (digits only, thousands separator is added), `data-unit`
+the unit label. See `index.html` for the full markup, `src/teaser.ts` for the
+component and `src/counter.ts` for the cross-fade logic.
 
 ## Development
 

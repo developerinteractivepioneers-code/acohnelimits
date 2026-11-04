@@ -1,42 +1,41 @@
-import { Reel } from './reel';
+import { Counter } from './counter';
 
 /**
  * Driving statistics teaser card.
  *
- * Shows the number from `data-value` on an odometer reel that keeps wandering
- * until the call-to-action is clicked, then eases onto the final value.
+ * Cycles softly through random distances in the range a user's number could
+ * fall into, until the call-to-action is clicked. Then it fades to the final
+ * value from `data-value`.
  */
 export class DrivingStatsTeaser {
   private readonly root: HTMLElement;
   private readonly odometer: HTMLElement;
   private readonly announce: HTMLElement | null;
   private readonly cta: HTMLButtonElement;
-  private readonly reel: Reel;
+  private readonly counter: Counter;
   private readonly value: number;
   private readonly unit: string;
   private readonly reducedMotion: boolean;
-
-  private frame = 0;
-  private lastTime = 0;
-  private running = false;
 
   constructor(root: HTMLElement) {
     this.root = root;
     this.odometer = this.require('[data-odometer]');
     this.cta = this.require<HTMLButtonElement>('[data-generate]');
     this.announce = root.querySelector('[data-announce]');
-    this.value = Number((root.dataset['value'] ?? '0').replace(/\D/g, ''));
+    this.value = readNumber(root.dataset['value'], 0);
     this.unit = root.dataset['unit'] ?? '';
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    this.reel = new Reel({
+    const max = readNumber(root.dataset['max'], 50000);
+    this.counter = new Counter({
       home: this.value,
-      wander: 14,
-      retargetMin: 0.5,
-      retargetMax: 1.4,
+      min: Math.min(readNumber(root.dataset['min'], 100), max),
+      max,
+      holdMin: 2.4,
+      holdMax: 3.6,
       format: formatNumber,
     });
-    this.buildOdometer();
+    this.buildOdometer(max);
     this.cta.addEventListener('click', this.handleGenerate);
 
     if (this.reducedMotion) {
@@ -57,18 +56,17 @@ export class DrivingStatsTeaser {
     if (this.reducedMotion) {
       return;
     }
-    this.reel.reset();
-    this.start();
+    this.counter.reset();
   }
 
   destroy(): void {
-    this.stop();
+    this.counter.stop();
     this.cta.removeEventListener('click', this.handleGenerate);
   }
 
-  private buildOdometer(): void {
-    this.odometer.appendChild(this.reel.element);
-    this.reserveWidth();
+  private buildOdometer(max: number): void {
+    this.odometer.appendChild(this.counter.element);
+    this.reserveWidth(max);
 
     if (this.unit) {
       const unit = document.createElement('span');
@@ -78,18 +76,17 @@ export class DrivingStatsTeaser {
     }
   }
 
-  /** Reserve the width of the widest value the reel can show, so nothing reflows. */
-  private reserveWidth(): void {
+  /** Reserve the width of the widest possible value, so the unit never moves. */
+  private reserveWidth(max: number): void {
     const probe = document.createElement('span');
-    probe.className = 'reel__row';
-    probe.style.position = 'absolute';
+    probe.className = 'counter__value is-current';
     probe.style.visibility = 'hidden';
-    probe.textContent = formatNumber(this.value + 14).replace(/\d/g, '0');
-    this.reel.element.appendChild(probe);
+    probe.textContent = formatNumber(Math.max(max, this.value)).replace(/\d/g, '0');
+    this.counter.element.appendChild(probe);
     const width = probe.getBoundingClientRect().width;
     probe.remove();
     if (width > 0) {
-      this.reel.element.style.width = `${Math.ceil(width)}px`;
+      this.counter.element.style.width = `${Math.ceil(width)}px`;
     }
   }
 
@@ -104,17 +101,15 @@ export class DrivingStatsTeaser {
       return;
     }
 
-    this.reel.settle();
-    this.start();
+    this.counter.settle(() => this.finish());
   };
 
   private showFinal(): void {
-    this.reel.snapToHome();
+    this.counter.snapToHome();
     this.finish();
   }
 
   private finish(): void {
-    this.stop();
     this.root.classList.add('is-settled');
     if (this.announce) {
       this.announce.textContent = `${formatNumber(this.value)} ${this.unit}`.trim();
@@ -123,53 +118,22 @@ export class DrivingStatsTeaser {
 
   private observeVisibility(): void {
     if (!('IntersectionObserver' in window)) {
-      this.start();
+      this.counter.start();
       return;
     }
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries.some((entry) => entry.isIntersecting);
         if (visible && !this.root.classList.contains('is-settled')) {
-          this.start();
+          this.counter.start();
         } else {
-          this.stop();
+          this.counter.stop();
         }
       },
       { threshold: 0.1 },
     );
     observer.observe(this.root);
   }
-
-  private start(): void {
-    if (this.running) {
-      return;
-    }
-    this.running = true;
-    this.lastTime = performance.now();
-    this.frame = requestAnimationFrame(this.tick);
-  }
-
-  private stop(): void {
-    this.running = false;
-    cancelAnimationFrame(this.frame);
-  }
-
-  private readonly tick = (now: number): void => {
-    if (!this.running) {
-      return;
-    }
-    // Clamp so a backgrounded tab does not produce one giant jump on return.
-    const dt = Math.min((now - this.lastTime) / 1000, 0.05);
-    this.lastTime = now;
-
-    this.reel.update(dt);
-
-    if (this.reel.isSettled) {
-      this.finish();
-      return;
-    }
-    this.frame = requestAnimationFrame(this.tick);
-  };
 
   private require<T extends HTMLElement = HTMLElement>(selector: string): T {
     const element = this.root.querySelector<T>(selector);
@@ -179,6 +143,11 @@ export class DrivingStatsTeaser {
     return element;
   }
 }
+
+const readNumber = (raw: string | undefined, fallback: number): number => {
+  const parsed = Number((raw ?? '').replace(/\D/g, ''));
+  return Number.isFinite(parsed) && raw ? parsed : fallback;
+};
 
 /** 2168 → "2.168" (German/Swiss style thousands separator). */
 const formatNumber = (value: number): string =>
