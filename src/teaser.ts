@@ -45,6 +45,11 @@ export class DrivingStatsTeaser {
     odometer.appendChild(numberBox);
     this.number = new FadeText(numberBox, 'counter__value');
     this.numberProbe = createProbe(numberBox, 'counter__value');
+    // The streaks live inside the number box so they always sit over the digits.
+    const bars = root.querySelector('[data-bars]');
+    if (bars) {
+      numberBox.insertBefore(bars, numberBox.firstChild);
+    }
 
     const unitBox = document.createElement('span');
     unitBox.className = 'odometer__unit';
@@ -104,6 +109,8 @@ export class DrivingStatsTeaser {
     if (width > 0) {
       this.stats.style.setProperty('--stats-width', `${Math.ceil(width)}px`);
     }
+    // Fewer streaks over short numbers, so they do not pile up.
+    this.root.classList.toggle('is-narrow', numberWidth < NARROW_NUMBER_WIDTH);
   }
 
   private applyMetric(metric: Metric, value: number, animate: boolean, onDone?: () => void): void {
@@ -203,6 +210,9 @@ export class DrivingStatsTeaser {
     return element;
   }
 }
+
+/** Below this number width (px) every other streak is hidden. */
+const NARROW_NUMBER_WIDTH = 90;
 
 /** Hidden copy of a fade layer used to measure text width without affecting layout. */
 const createProbe = (container: HTMLElement, layerClass: string): HTMLElement => {

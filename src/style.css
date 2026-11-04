@@ -61,7 +61,7 @@ body {
   position: relative;
   display: flex;
   align-items: center;
-  height: 230px;
+  height: 240px;
 }
 
 /*
@@ -77,10 +77,11 @@ body {
   height: 100%;
 }
 
+/* Fills the figure edge to edge; for very short numbers it may overhang
+   the visual's height a little, which the card padding absorbs. */
 .teaser__map {
   display: block;
   width: 100%;
-  max-width: 228px;
   height: auto;
 }
 
@@ -100,7 +101,7 @@ body {
   position: relative;
   flex: none;
   width: var(--stats-width, 199px);
-  min-width: 88px;
+  min-width: 64px;
   max-width: 100%;
   height: 100%;
   transition: width var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1);
@@ -137,10 +138,15 @@ body {
 
 /* Shooting stars ------------------------------------------------------------ */
 
+/* Positioned inside the number box, so the streaks always sit over the digits. */
 .bars {
   position: absolute;
   inset: 0;
   pointer-events: none;
+}
+
+.is-narrow .bar:nth-child(even) {
+  display: none;
 }
 
 /*
@@ -256,7 +262,7 @@ body {
   position: absolute;
   left: 12px;
   right: 0;
-  bottom: 72px;
+  bottom: 76px;
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;

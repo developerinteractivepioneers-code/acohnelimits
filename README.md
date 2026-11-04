@@ -14,8 +14,10 @@ waiting for the user to hit **Generate Driving Statistics**.
 - **Fit to value** – the right column is only as wide as the current number
   and unit; the map grows into the space short values free up, animated in
   step with the cross-fade.
-- **Shooting stars** – thin red streaks appear low, rise slowly, decelerate
-  and burn out (pure CSS keyframes).
+- **Shooting stars** – thin red streaks appear low over the digits, rise
+  slowly, decelerate and burn out (pure CSS keyframes). They are positioned
+  inside the number box, so they follow its width; over short numbers every
+  other streak is hidden.
 - **Generate** – fades to the final value from `data-value` on the first
   metric and stops.
 - **Reduced motion** – with `prefers-reduced-motion: reduce` the final number
