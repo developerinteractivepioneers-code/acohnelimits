@@ -58,7 +58,8 @@ body {
 }
 
 .teaser__visual {
-  --visual-height: 250px;
+  --visual-height: 230px;
+  --map-height: 160px;
   position: relative;
   display: flex;
   align-items: center;
@@ -66,28 +67,23 @@ body {
 }
 
 /*
- * Takes whatever width the stats column leaves over and clips the map at
- * the divider. The map itself keeps a fixed size, so as the column shrinks
- * the divider wipes right and reveals more of the terrain.
+ * Takes whatever width the stats column leaves over. The map always spans
+ * it edge to edge at a fixed height: as the column shrinks the mountains
+ * are pulled wider to the right, as it grows they are squeezed back.
  */
 .teaser__figure {
   flex: 1 1 auto;
   display: flex;
-  justify-content: flex-start;
   align-items: center;
   min-width: 0;
   height: 100%;
-  overflow: hidden;
 }
 
-/* Sized to the widest the figure can get (card width minus divider and the
-   narrowest stats column), anchored left. Replace with a wider asset to
-   reveal more terrain instead of the image's right edge. */
 .teaser__map {
-  flex: none;
   display: block;
-  width: var(--map-width, 247px);
-  height: auto;
+  width: 100%;
+  height: var(--map-height);
+  object-fit: fill;
 }
 
 .teaser__divider {
@@ -267,7 +263,7 @@ body {
   position: absolute;
   left: 12px;
   right: 0;
-  bottom: 80px;
+  bottom: 72px;
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
