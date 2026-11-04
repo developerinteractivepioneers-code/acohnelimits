@@ -105,8 +105,9 @@ export class DrivingStatsTeaser {
     const inset = parseFloat(odometerStyle.left) || 0;
     const outset = parseFloat(odometerStyle.right) || 0;
     const unitGap = unitBox ? parseFloat(getComputedStyle(unitBox).marginLeft) || 0 : 0;
-    const numberWidth = this.numberProbe.getBoundingClientRect().width;
-    const unitWidth = unit ? unitGap + this.unitProbe.getBoundingClientRect().width : 0;
+    // offsetWidth is in layout pixels and unaffected by CSS zoom, unlike client rects.
+    const numberWidth = this.numberProbe.offsetWidth;
+    const unitWidth = unit ? unitGap + this.unitProbe.offsetWidth : 0;
     const width = inset + numberWidth + unitWidth + outset;
     if (width > 0) {
       this.stats.style.setProperty('--stats-width', `${Math.ceil(width)}px`);
