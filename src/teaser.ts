@@ -1,19 +1,18 @@
-import { Reel, type ReelOptions } from './reel';
+import { Reel } from './reel';
 
 /**
  * Driving statistics teaser card.
  *
- * Builds one odometer reel per digit of `data-value`, keeps them wandering
- * until the call-to-action is clicked, then lets them spin to the final
- * number from left to right.
+ * Shows the number from `data-value` on an odometer reel that keeps wandering
+ * until the call-to-action is clicked, then eases onto the final value.
  */
 export class DrivingStatsTeaser {
   private readonly root: HTMLElement;
   private readonly odometer: HTMLElement;
   private readonly announce: HTMLElement | null;
   private readonly cta: HTMLButtonElement;
-  private readonly reels: Reel[] = [];
-  private readonly value: string;
+  private readonly reel: Reel;
+  private readonly value: number;
   private readonly unit: string;
   private readonly reducedMotion: boolean;
 
@@ -26,10 +25,17 @@ export class DrivingStatsTeaser {
     this.odometer = this.require('[data-odometer]');
     this.cta = this.require<HTMLButtonElement>('[data-generate]');
     this.announce = root.querySelector('[data-announce]');
-    this.value = root.dataset['value'] ?? '0';
+    this.value = Number((root.dataset['value'] ?? '0').replace(/\D/g, ''));
     this.unit = root.dataset['unit'] ?? '';
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    this.reel = new Reel({
+      home: this.value,
+      wander: 14,
+      retargetMin: 0.5,
+      retargetMax: 1.4,
+      format: formatNumber,
+    });
     this.buildOdometer();
     this.cta.addEventListener('click', this.handleGenerate);
 
@@ -51,7 +57,7 @@ export class DrivingStatsTeaser {
     if (this.reducedMotion) {
       return;
     }
-    this.reels.forEach((reel) => reel.reset());
+    this.reel.reset();
     this.start();
   }
 
@@ -61,36 +67,29 @@ export class DrivingStatsTeaser {
   }
 
   private buildOdometer(): void {
-    const digits = this.value.replace(/\D/g, '');
-    const count = digits.length;
-
-    Array.from(digits).forEach((char, index) => {
-      // Leading digits wander little and slowly, trailing ones more and faster.
-      const options: ReelOptions = {
-        home: Number(char),
-        wander: Math.min(1.2 + index * 1.6, 7),
-        retargetMin: Math.max(0.45, 1.6 - index * 0.3),
-        retargetMax: Math.max(0.9, 2.8 - index * 0.4),
-        spins: index,
-      };
-      const reel = new Reel(options);
-      this.reels.push(reel);
-      this.odometer.appendChild(reel.element);
-
-      const positionFromRight = count - index;
-      if (positionFromRight > 1 && positionFromRight % 3 === 1) {
-        const separator = document.createElement('span');
-        separator.className = 'odometer__separator';
-        separator.textContent = '.';
-        this.odometer.appendChild(separator);
-      }
-    });
+    this.odometer.appendChild(this.reel.element);
+    this.reserveWidth();
 
     if (this.unit) {
       const unit = document.createElement('span');
       unit.className = 'odometer__unit';
       unit.textContent = this.unit;
       this.odometer.appendChild(unit);
+    }
+  }
+
+  /** Reserve the width of the widest value the reel can show, so nothing reflows. */
+  private reserveWidth(): void {
+    const probe = document.createElement('span');
+    probe.className = 'reel__row';
+    probe.style.position = 'absolute';
+    probe.style.visibility = 'hidden';
+    probe.textContent = formatNumber(this.value + 14).replace(/\d/g, '0');
+    this.reel.element.appendChild(probe);
+    const width = probe.getBoundingClientRect().width;
+    probe.remove();
+    if (width > 0) {
+      this.reel.element.style.width = `${Math.ceil(width)}px`;
     }
   }
 
@@ -105,12 +104,12 @@ export class DrivingStatsTeaser {
       return;
     }
 
-    this.reels.forEach((reel, index) => reel.settle(index * 0.22));
+    this.reel.settle();
     this.start();
   };
 
   private showFinal(): void {
-    this.reels.forEach((reel) => reel.snapToHome());
+    this.reel.snapToHome();
     this.finish();
   }
 
@@ -118,12 +117,8 @@ export class DrivingStatsTeaser {
     this.stop();
     this.root.classList.add('is-settled');
     if (this.announce) {
-      this.announce.textContent = `${this.formattedValue()} ${this.unit}`.trim();
+      this.announce.textContent = `${formatNumber(this.value)} ${this.unit}`.trim();
     }
-  }
-
-  private formattedValue(): string {
-    return this.value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
   }
 
   private observeVisibility(): void {
@@ -167,9 +162,9 @@ export class DrivingStatsTeaser {
     const dt = Math.min((now - this.lastTime) / 1000, 0.05);
     this.lastTime = now;
 
-    this.reels.forEach((reel) => reel.update(dt));
+    this.reel.update(dt);
 
-    if (this.reels.every((reel) => reel.isSettled)) {
+    if (this.reel.isSettled) {
       this.finish();
       return;
     }
@@ -184,3 +179,7 @@ export class DrivingStatsTeaser {
     return element;
   }
 }
+
+/** 2168 → "2.168" (German/Swiss style thousands separator). */
+const formatNumber = (value: number): string =>
+  String(Math.round(value)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');

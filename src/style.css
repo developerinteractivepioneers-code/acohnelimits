@@ -120,7 +120,7 @@ body {
   opacity: 0.85;
 }
 
-/* Rising bars ------------------------------------------------------------ */
+/* Shooting stars ------------------------------------------------------------ */
 
 .bars {
   position: absolute;
@@ -128,59 +128,44 @@ body {
   pointer-events: none;
 }
 
+/*
+ * Each star is a short streak: bright head at the top, fading tail below.
+ * It appears low, shoots upwards, slows down and burns out at `bottom`.
+ */
 .bar {
   position: absolute;
   left: var(--x);
   bottom: var(--b);
   width: 2px;
   height: var(--h);
-  /* Solid head at the top, fading tail below: reads as a spark rising upward. */
   background: linear-gradient(
     to bottom,
     var(--color-brand) 0%,
-    rgba(213, 0, 28, 0.6) 55%,
+    rgba(213, 0, 28, 0.55) 45%,
     rgba(213, 0, 28, 0) 100%
   );
-  transform-origin: bottom center;
-  transform: scaleY(0);
-  animation: bar-rise var(--dur, 2.8s) cubic-bezier(0.22, 0.8, 0.25, 1) var(--delay, 0s) infinite;
+  transform-origin: top center;
+  opacity: 0;
+  animation: shooting-star var(--dur, 1.8s) cubic-bezier(0.12, 0.65, 0.3, 1) var(--delay, 0s) infinite;
 }
 
-@keyframes bar-rise {
+@keyframes shooting-star {
   0% {
-    transform: scaleY(0);
+    transform: translateY(var(--travel, 70px)) scaleY(0.35);
     opacity: 0;
   }
-  8% {
+  10% {
+    transform: translateY(calc(var(--travel, 70px) * 0.72)) scaleY(1);
     opacity: 1;
   }
   55% {
-    transform: scaleY(1);
     opacity: 1;
   }
-  78% {
-    transform: scaleY(1);
-    opacity: 1;
-  }
+  82%,
   100% {
-    transform: scaleY(1) translateY(-6px);
+    /* Burn out: the head stays put while the tail shrinks away. */
+    transform: translateY(0) scaleY(0.2);
     opacity: 0;
-  }
-}
-
-/* Once the number has settled the bars finish one last rise and stay. */
-.is-settled .bar {
-  animation: bar-rise-final 0.9s cubic-bezier(0.22, 0.8, 0.25, 1) forwards;
-}
-
-@keyframes bar-rise-final {
-  from {
-    transform: scaleY(0);
-    opacity: 0;
-  }
-  to {
-    transform: scaleY(1);
-    opacity: 1;
   }
 }
 
@@ -223,9 +208,10 @@ body {
 .reel {
   position: relative;
   display: inline-block;
-  width: 0.58em;
+  width: 3em; /* overwritten with the measured width of the value */
   height: 1em;
   overflow: visible;
+  white-space: nowrap;
 }
 
 .reel__strip {
@@ -237,17 +223,10 @@ body {
   will-change: transform;
 }
 
-.reel__digit {
+.reel__row {
   display: block;
   height: 1em;
   line-height: 1;
-}
-
-.odometer__separator {
-  width: 0.3em;
-  height: 1em;
-  line-height: 1;
-  text-align: center;
 }
 
 .odometer__unit {
