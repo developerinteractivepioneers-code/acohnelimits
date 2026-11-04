@@ -60,18 +60,28 @@ body {
 .teaser__visual {
   position: relative;
   display: flex;
+  align-items: center;
+  height: 230px;
+}
+
+/*
+ * Takes whatever width the stats column leaves over. The map fills it, so
+ * the mountains grow into the space short numbers free up.
+ */
+.teaser__figure {
+  flex: 1 1 auto;
+  display: flex;
   justify-content: flex-end;
   align-items: center;
-  height: 220px;
+  min-width: 0;
+  height: 100%;
 }
 
 .teaser__map {
-  flex: none;
   display: block;
-  width: 138px;
+  width: 100%;
+  max-width: 228px;
   height: auto;
-  align-self: start;
-  margin-top: 56px;
 }
 
 .teaser__divider {
