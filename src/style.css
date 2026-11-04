@@ -172,17 +172,18 @@ body {
 /* Cross-fading number -------------------------------------------------------- */
 
 .odometer {
-  --digit-size: 44px;
-  --fade-duration: 1.4s;
+  --digit-size: 40px;
+  --fade-duration: 1s;
   position: absolute;
-  left: 18px;
-  bottom: 70px;
+  left: 12px;
+  right: 0;
+  bottom: 72px;
   display: flex;
   align-items: flex-end;
   font-size: var(--digit-size);
   font-weight: 200;
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
   color: #2b2b2b;
 }
@@ -248,6 +249,7 @@ body {
 }
 
 .odometer__unit {
+  flex: none;
   margin-left: 0.25em;
   padding-bottom: 0.12em;
   font-size: 0.4em;

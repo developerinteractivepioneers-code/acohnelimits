@@ -31,8 +31,8 @@ export class DrivingStatsTeaser {
       home: this.value,
       min: Math.min(readNumber(root.dataset['min'], 100), max),
       max,
-      holdMin: 2.4,
-      holdMax: 3.6,
+      holdMin: 1.6,
+      holdMax: 2.4,
       format: formatNumber,
     });
     this.buildOdometer(max);
