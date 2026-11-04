@@ -12,7 +12,8 @@ waiting for the user to hit **Generate Driving Statistics**.
   into place. Values are drawn log-uniformly from each metric's range, so
   small and large numbers appear about equally often.
 - **Fit to value** – the right column is only as wide as the current number
-  and unit; the map grows into the space short values free up, animated in
+  and unit. The map keeps a fixed size and is clipped at the divider, so for
+  short values the divider wipes right and reveals more terrain, animated in
   step with the cross-fade.
 - **Shooting stars** – thin red streaks appear low over the digits, rise
   slowly, decelerate and burn out (pure CSS keyframes). They are positioned
@@ -57,7 +58,8 @@ npm run build
 
 ## Notes
 
-- `public/assets/map-placeholder.png` is cropped from the design screenshot and
-  should be replaced by the real map asset.
+- `public/assets/map.png` is shown at 247 px width (`--map-width` in
+  `src/style.css`); supply it at least at 2× that size, and wider on the
+  right if more terrain should be revealed.
 - The font stack falls back to Helvetica/Arial; swap `--font-sans` in
   `src/style.css` for the brand font.

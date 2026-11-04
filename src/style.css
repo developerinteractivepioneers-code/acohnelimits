@@ -58,30 +58,35 @@ body {
 }
 
 .teaser__visual {
+  --visual-height: 250px;
   position: relative;
   display: flex;
   align-items: center;
-  height: 240px;
+  height: var(--visual-height);
 }
 
 /*
- * Takes whatever width the stats column leaves over. The map fills it, so
- * the mountains grow into the space short numbers free up.
+ * Takes whatever width the stats column leaves over and clips the map at
+ * the divider. The map itself keeps a fixed size, so as the column shrinks
+ * the divider wipes right and reveals more of the terrain.
  */
 .teaser__figure {
   flex: 1 1 auto;
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
   min-width: 0;
   height: 100%;
+  overflow: hidden;
 }
 
-/* Fills the figure edge to edge; for very short numbers it may overhang
-   the visual's height a little, which the card padding absorbs. */
+/* Sized to the widest the figure can get (card width minus divider and the
+   narrowest stats column), anchored left. Replace with a wider asset to
+   reveal more terrain instead of the image's right edge. */
 .teaser__map {
+  flex: none;
   display: block;
-  width: 100%;
+  width: var(--map-width, 247px);
   height: auto;
 }
 
@@ -101,7 +106,7 @@ body {
   position: relative;
   flex: none;
   width: var(--stats-width, 199px);
-  min-width: 64px;
+  min-width: 90px;
   max-width: 100%;
   height: 100%;
   transition: width var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1);
@@ -262,7 +267,7 @@ body {
   position: absolute;
   left: 12px;
   right: 0;
-  bottom: 76px;
+  bottom: 80px;
   display: flex;
   justify-content: flex-end;
   align-items: flex-end;
