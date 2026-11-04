@@ -1,5 +1,5 @@
 import { FadeText } from './fade-text';
-import { formatValue, parseMetrics, randomValue, widestValue, type Metric } from './metrics';
+import { formatValue, parseMetrics, randomValue, type Metric } from './metrics';
 
 /**
  * Driving statistics teaser card.
@@ -15,6 +15,9 @@ export class DrivingStatsTeaser {
   private readonly number: FadeText;
   private readonly unit: FadeText;
   private readonly claim: FadeText;
+  private readonly stats: HTMLElement;
+  private readonly numberProbe: HTMLElement;
+  private readonly unitProbe: HTMLElement;
   private readonly metrics: Metric[];
   private readonly finalValue: number;
   private readonly reducedMotion: boolean;
@@ -35,20 +38,22 @@ export class DrivingStatsTeaser {
     this.finalValue = Number((root.dataset['value'] ?? '0').replace(/[^\d.]/g, '')) || 0;
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    this.stats = this.require('[data-stats]');
     const odometer = this.require('[data-odometer]');
     const numberBox = document.createElement('span');
     numberBox.className = 'counter';
     odometer.appendChild(numberBox);
     this.number = new FadeText(numberBox, 'counter__value');
+    this.numberProbe = createProbe(numberBox, 'counter__value');
 
     const unitBox = document.createElement('span');
     unitBox.className = 'odometer__unit';
     odometer.appendChild(unitBox);
     this.unit = new FadeText(unitBox, 'odometer__unit-value');
+    this.unitProbe = createProbe(unitBox, 'odometer__unit-value');
 
     this.claim = new FadeText(this.require('[data-claim]'), 'teaser__claim-value');
 
-    this.reserveWidth(numberBox);
     this.cta.addEventListener('click', this.handleGenerate);
 
     if (this.reducedMotion) {
@@ -82,26 +87,28 @@ export class DrivingStatsTeaser {
     return this.metrics[this.index] ?? this.metrics[0] ?? parseMetrics(this.root)[0]!;
   }
 
-  /** Reserve the width of the widest value of any metric, so the unit never moves. */
-  private reserveWidth(numberBox: HTMLElement): void {
-    const probe = document.createElement('span');
-    probe.className = 'fade__layer counter__value is-current';
-    probe.style.visibility = 'hidden';
-    numberBox.appendChild(probe);
-    const width = Math.max(
-      ...this.metrics.map((metric) => {
-        probe.textContent = widestValue(metric);
-        return probe.getBoundingClientRect().width;
-      }),
-    );
-    probe.remove();
+  /**
+   * Size the stats column to the given number and unit. The CSS transition
+   * on the column animates the change, map and divider follow.
+   */
+  private fitStats(text: string, unit: string): void {
+    this.numberProbe.textContent = text;
+    this.unitProbe.textContent = unit;
+    const odometer = this.require('[data-odometer]');
+    const unitBox = this.unitProbe.parentElement;
+    const inset = parseFloat(getComputedStyle(odometer).left) || 0;
+    const unitGap = unitBox ? parseFloat(getComputedStyle(unitBox).marginLeft) || 0 : 0;
+    const numberWidth = this.numberProbe.getBoundingClientRect().width;
+    const unitWidth = unit ? unitGap + this.unitProbe.getBoundingClientRect().width : 0;
+    const width = inset + numberWidth + unitWidth;
     if (width > 0) {
-      numberBox.style.width = `${Math.ceil(width)}px`;
+      this.stats.style.setProperty('--stats-width', `${Math.ceil(width)}px`);
     }
   }
 
   private applyMetric(metric: Metric, value: number, animate: boolean, onDone?: () => void): void {
     const text = formatValue(value, metric.decimals);
+    this.fitStats(text, metric.unit);
     if (!animate) {
       this.number.set(text);
       this.unit.set(metric.unit);
@@ -196,3 +203,12 @@ export class DrivingStatsTeaser {
     return element;
   }
 }
+
+/** Hidden copy of a fade layer used to measure text width without affecting layout. */
+const createProbe = (container: HTMLElement, layerClass: string): HTMLElement => {
+  const probe = document.createElement('span');
+  probe.className = `fade__probe ${layerClass}`;
+  probe.setAttribute('aria-hidden', 'true');
+  container.appendChild(probe);
+  return probe;
+};

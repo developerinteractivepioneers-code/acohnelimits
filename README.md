@@ -11,6 +11,9 @@ waiting for the user to hit **Generate Driving Statistics**.
   in together: the old text drifts up and blurs out while the new one rises
   into place. Values are drawn log-uniformly from each metric's range, so
   small and large numbers appear about equally often.
+- **Fit to value** – the right column is only as wide as the current number
+  and unit; map and divider slide right for short values, animated in step
+  with the cross-fade.
 - **Shooting stars** – thin red streaks appear low, rise slowly, decelerate
   and burn out (pure CSS keyframes).
 - **Generate** – fades to the final value from `data-value` on the first
