@@ -14,25 +14,27 @@
             <img
               class="teaser__map"
               src="/assets/map.png"
-              width="143"
-              height="155"
+              width="243"
+              height="196"
               alt=""
               decoding="async"
             />
           </div>
           <div class="teaser__divider" aria-hidden="true"></div>
           <div class="teaser__stats" data-stats>
+            <!--
+              Streak geometry from the design: x as a share of the number width,
+              bottom offset from the number's baseline box, length and peak opacity.
+              The two tall streaks are dropped over short numbers.
+            -->
             <div class="bars" data-bars aria-hidden="true">
-              <span class="bar" style="--x: 4%; --b: 60px; --h: 28px; --dur: 3.4s; --delay: 0s; --travel: 56px"></span>
-              <span class="bar" style="--x: 14%; --b: 84px; --h: 40px; --dur: 4.2s; --delay: -1.3s; --travel: 72px"></span>
-              <span class="bar" style="--x: 24%; --b: 46px; --h: 24px; --dur: 3.1s; --delay: -2.4s; --travel: 50px"></span>
-              <span class="bar" style="--x: 34%; --b: 94px; --h: 36px; --dur: 3.8s; --delay: -0.6s; --travel: 66px"></span>
-              <span class="bar" style="--x: 44%; --b: 68px; --h: 32px; --dur: 3.3s; --delay: -2.0s; --travel: 58px"></span>
-              <span class="bar" style="--x: 54%; --b: 102px; --h: 44px; --dur: 4.4s; --delay: -3.0s; --travel: 80px"></span>
-              <span class="bar" style="--x: 64%; --b: 52px; --h: 22px; --dur: 3.0s; --delay: -1.6s; --travel: 48px"></span>
-              <span class="bar" style="--x: 74%; --b: 88px; --h: 38px; --dur: 4.0s; --delay: -0.4s; --travel: 70px"></span>
-              <span class="bar" style="--x: 84%; --b: 64px; --h: 30px; --dur: 3.6s; --delay: -2.6s; --travel: 60px"></span>
-              <span class="bar" style="--x: 94%; --b: 78px; --h: 26px; --dur: 3.2s; --delay: -1.0s; --travel: 54px"></span>
+              <span class="bar" style="--x: 8%; --b: 2px; --h: 61px; --alpha: 0.5; --dur: 3.4s; --delay: 0s; --travel: 48px"></span>
+              <span class="bar" data-hide-narrow style="--x: 40%; --b: -32px; --h: 95px; --alpha: 1; --dur: 4.2s; --delay: -1.3s; --travel: 70px"></span>
+              <span class="bar" data-hide-narrow style="--x: 61%; --b: 36px; --h: 92px; --alpha: 1; --dur: 3.8s; --delay: -2.4s; --travel: 66px"></span>
+              <span class="bar" style="--x: 70%; --b: -27px; --h: 42px; --alpha: 1; --dur: 3.1s; --delay: -0.6s; --travel: 40px"></span>
+              <span class="bar" style="--x: 76%; --b: -10px; --h: 82px; --alpha: 0.25; --dur: 4.4s; --delay: -3.0s; --travel: 60px"></span>
+              <span class="bar" style="--x: 95%; --b: 36px; --h: 66px; --alpha: 1; --dur: 3.6s; --delay: -1.8s; --travel: 54px"></span>
+              <span class="bar" style="--x: 104%; --b: -14px; --h: 48px; --alpha: 1; --dur: 3.3s; --delay: -0.9s; --travel: 44px"></span>
             </div>
             <div class="odometer" data-odometer aria-hidden="true"></div>
             <p class="visually-hidden" data-announce aria-live="polite"></p>
@@ -43,7 +45,7 @@
           [
             { "claim": "Ready to explore your kilometres?", "unit": "km", "min": 100, "max": 50000 },
             { "claim": "Ready to explore your routes?", "unit": "", "min": 1, "max": 150 },
-            { "claim": "Ready to explore your curves?", "unit": "", "min": 50, "max": 20000 },
+            { "claim": "Ready to explore your curves?", "unit": "Stk", "min": 50, "max": 20000 },
             { "claim": "Ready to explore your driving time?", "unit": "h", "min": 1, "max": 800 },
             { "claim": "Ready to explore your lateral G?", "unit": "g", "min": 0.3, "max": 1.2, "decimals": 1 },
             { "claim": "Ready to explore your elevation gain?", "unit": "m", "min": 100, "max": 60000 }

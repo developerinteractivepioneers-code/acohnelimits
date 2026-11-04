@@ -1,14 +1,19 @@
 :root {
   --color-brand: #d5001c;
-  --color-text: #1c1c1c;
-  --color-text-muted: #4a4a4a;
-  --color-divider: #afafaf;
+  --color-text: #000000;
+  --color-text-secondary: rgba(0, 0, 0, 0.5);
+  --color-divider: rgba(0, 0, 0, 0.5);
   --color-card: #ffffff;
   --color-page: #f2f2f2;
-  --radius-card: 24px;
-  --radius-cta: 8px;
+  --radius-card: 20px;
+  --radius-cta: 10px;
   --font-sans: "Porsche Next", "Helvetica Neue", Arial, system-ui, sans-serif;
-  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-card:
+    0 5px 15px rgba(0, 0, 0, 0.05),
+    0 30px 90px rgba(0, 0, 0, 0.1),
+    0 10px 40px rgba(0, 0, 0, 0.12);
+  --fade-duration: 1s;
+  --fade-easing: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 *,
@@ -32,14 +37,14 @@ body {
   display: grid;
   gap: 24px;
   justify-items: center;
-  width: min(100%, 418px);
+  width: min(100%, 368px);
   padding: 32px 16px;
 }
 
 .stage__reset {
   background: none;
   border: 0;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
   font: inherit;
   font-size: 13px;
   text-decoration: underline;
@@ -50,74 +55,89 @@ body {
 
 .teaser {
   width: 100%;
-  max-width: 386px;
-  padding: 24px 24px 28px;
+  max-width: 336px;
+  padding: 28px 20px 58px;
   background: var(--color-card);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
 }
 
+/* Visual: map | divider | stats, spanning the full card width. */
 .teaser__visual {
-  --visual-height: 230px;
-  --map-height: 160px;
   position: relative;
   display: flex;
   align-items: center;
-  height: var(--visual-height);
+  height: 220px;
+  margin: 0 -20px;
+  overflow: hidden;
 }
 
 /*
- * Takes whatever width the stats column leaves over. The map always spans
- * it edge to edge at a fixed height: as the column shrinks the mountains
- * are pulled wider to the right, as it grows they are squeezed back.
+ * Takes whatever width the stats column leaves over and clips the map at
+ * the divider. The map keeps its size and position, so as the column
+ * shrinks the divider wipes right and reveals more terrain.
  */
 .teaser__figure {
+  position: relative;
   flex: 1 1 auto;
-  display: flex;
-  align-items: center;
   min-width: 0;
   height: 100%;
+  overflow: hidden;
 }
 
 .teaser__map {
+  position: absolute;
+  left: 23px;
+  top: 12px;
   display: block;
-  width: 100%;
-  height: var(--map-height);
-  object-fit: fill;
+  width: 243px;
+  height: 196px;
 }
 
 .teaser__divider {
   flex: none;
   width: 1px;
-  height: 160px;
+  height: 177px;
   background: var(--color-divider);
 }
 
 /*
- * As wide as the current number plus unit (set from JS), so map and divider
- * slide right for short numbers instead of leaving a gap. The width animates
- * in step with the cross-fade.
+ * As wide as the current number plus unit (set from JS). The width animates
+ * in step with the cross-fade, which moves the divider and the map's clip.
  */
 .teaser__stats {
   position: relative;
   flex: none;
-  width: var(--stats-width, 199px);
+  width: var(--stats-width, 198px);
   min-width: 90px;
   max-width: 100%;
   height: 100%;
-  transition: width var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width var(--fade-duration) var(--fade-easing);
+}
+
+.teaser__claim {
+  display: grid;
+  justify-items: center;
+  margin: 15px 0 30px;
+  text-align: center;
+  font-size: 17px;
+  line-height: 22px;
+  color: var(--color-text);
 }
 
 .teaser__cta {
   display: block;
   width: 100%;
-  min-height: 56px;
+  min-height: 60px;
+  /* Design uses 30px; narrower so the label also fits with fallback fonts. */
+  padding: 8px 12px;
   border: 0;
   border-radius: var(--radius-cta);
   background: var(--color-brand);
   color: #fff;
   font: inherit;
-  font-size: 18px;
+  font-size: 20px;
+  line-height: 25px;
   cursor: pointer;
   transition:
     background-color 0.2s ease,
@@ -137,65 +157,7 @@ body {
   opacity: 0.85;
 }
 
-/* Shooting stars ------------------------------------------------------------ */
-
-/* Positioned inside the number box, so the streaks always sit over the digits. */
-.bars {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.is-narrow .bar:nth-child(even) {
-  display: none;
-}
-
-/*
- * Each star is a short streak: bright head at the top, fading tail below.
- * It appears low, shoots upwards, slows down and burns out at `bottom`.
- */
-.bar {
-  position: absolute;
-  left: var(--x);
-  bottom: var(--b);
-  width: 2px;
-  height: var(--h);
-  background: linear-gradient(
-    to bottom,
-    rgba(213, 0, 28, 0.85) 0%,
-    rgba(213, 0, 28, 0.35) 40%,
-    rgba(213, 0, 28, 0) 100%
-  );
-  transform-origin: top center;
-  opacity: 0;
-  animation: shooting-star var(--dur, 3.6s) cubic-bezier(0.25, 0.6, 0.35, 1) var(--delay, 0s) infinite;
-}
-
-@keyframes shooting-star {
-  0% {
-    transform: translateY(var(--travel, 60px)) scaleY(0.3);
-    opacity: 0;
-  }
-  18% {
-    transform: translateY(calc(var(--travel, 60px) * 0.65)) scaleY(1);
-    opacity: 0.9;
-  }
-  55% {
-    opacity: 0.8;
-  }
-  85%,
-  100% {
-    /* Burn out: the head stays put while the tail shrinks away. */
-    transform: translateY(0) scaleY(0.15);
-    opacity: 0;
-  }
-}
-
 /* Cross-fading text ---------------------------------------------------------- */
-
-:root {
-  --fade-duration: 1s;
-}
 
 /* Two layers share one grid cell; the container keeps the taller one's height. */
 .fade {
@@ -214,12 +176,12 @@ body {
 
 /* Outgoing text drifts up and dissolves … */
 .fade__layer.is-leaving {
-  animation: fade-leave var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fade-leave var(--fade-duration) var(--fade-easing) forwards;
 }
 
 /* … while the incoming one rises softly into place. */
 .fade__layer.is-entering {
-  animation: fade-enter var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fade-enter var(--fade-duration) var(--fade-easing) forwards;
 }
 
 @keyframes fade-leave {
@@ -259,20 +221,18 @@ body {
 /* Number and unit ------------------------------------------------------------ */
 
 .odometer {
-  --digit-size: 40px;
   position: absolute;
-  left: 12px;
-  right: 0;
-  bottom: 72px;
+  left: 20px;
+  right: 22px;
+  bottom: 78px;
   display: flex;
   justify-content: flex-end;
-  align-items: flex-end;
-  font-size: var(--digit-size);
-  font-weight: 200;
+  align-items: baseline;
+  font-size: 40px;
+  font-weight: 600;
   line-height: 1;
-  letter-spacing: 0;
   font-variant-numeric: tabular-nums;
-  color: #2b2b2b;
+  color: var(--color-text);
 }
 
 .counter {
@@ -290,37 +250,70 @@ body {
 .odometer__unit {
   position: relative;
   flex: none;
-  margin-left: 0.25em;
-  padding-bottom: 0.12em;
-  font-size: 0.4em;
+  margin-left: 5px;
+  font-size: 15.6px;
   font-weight: 400;
   line-height: 1;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
-/* Claim ------------------------------------------------------------------------ */
+/* Shooting stars ------------------------------------------------------------ */
 
-.teaser__claim {
-  display: grid;
-  justify-items: center;
-  margin: 28px 0 20px;
-  text-align: center;
-  font-size: 15px;
-  color: var(--color-text-muted);
+/* Positioned inside the number box, so the streaks always sit over the digits. */
+.bars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
 }
 
-/* Settled: the final number gets its full weight. */
-.is-settled .odometer {
-  color: var(--color-text);
-  transition: color 0.6s ease;
+.is-narrow .bar[data-hide-narrow] {
+  display: none;
 }
 
-/* Reduced motion: static final number, bars drawn once. */
+/*
+ * Each streak is a 2px line with round ends: solid red head at the top,
+ * fading to transparent at the bottom. It appears low, shoots upwards,
+ * slows down and burns out at `bottom`.
+ */
+.bar {
+  position: absolute;
+  left: var(--x);
+  bottom: var(--b);
+  width: 2px;
+  height: var(--h);
+  border-radius: 1px;
+  background: linear-gradient(to bottom, var(--color-brand) 0%, rgba(213, 0, 28, 0) 100%);
+  transform-origin: top center;
+  opacity: 0;
+  animation: shooting-star var(--dur, 3.6s) cubic-bezier(0.25, 0.6, 0.35, 1) var(--delay, 0s) infinite;
+}
+
+@keyframes shooting-star {
+  0% {
+    transform: translateY(var(--travel, 60px)) scaleY(0.3);
+    opacity: 0;
+  }
+  18% {
+    transform: translateY(calc(var(--travel, 60px) * 0.65)) scaleY(1);
+    opacity: var(--alpha, 1);
+  }
+  55% {
+    opacity: var(--alpha, 1);
+  }
+  85%,
+  100% {
+    /* Burn out: the head stays put while the tail shrinks away. */
+    transform: translateY(0) scaleY(0.15);
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: static final number, streaks drawn once. */
 @media (prefers-reduced-motion: reduce) {
   .bar {
     animation: none;
     transform: none;
-    opacity: 0.5;
+    opacity: var(--alpha, 1);
   }
 
   .fade__layer.is-leaving,

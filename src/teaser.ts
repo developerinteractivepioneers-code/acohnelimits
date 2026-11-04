@@ -101,11 +101,13 @@ export class DrivingStatsTeaser {
     this.unitProbe.textContent = unit;
     const odometer = this.require('[data-odometer]');
     const unitBox = this.unitProbe.parentElement;
-    const inset = parseFloat(getComputedStyle(odometer).left) || 0;
+    const odometerStyle = getComputedStyle(odometer);
+    const inset = parseFloat(odometerStyle.left) || 0;
+    const outset = parseFloat(odometerStyle.right) || 0;
     const unitGap = unitBox ? parseFloat(getComputedStyle(unitBox).marginLeft) || 0 : 0;
     const numberWidth = this.numberProbe.getBoundingClientRect().width;
     const unitWidth = unit ? unitGap + this.unitProbe.getBoundingClientRect().width : 0;
-    const width = inset + numberWidth + unitWidth;
+    const width = inset + numberWidth + unitWidth + outset;
     if (width > 0) {
       this.stats.style.setProperty('--stats-width', `${Math.ceil(width)}px`);
     }
@@ -212,7 +214,7 @@ export class DrivingStatsTeaser {
 }
 
 /** Below this number width (px) every other streak is hidden. */
-const NARROW_NUMBER_WIDTH = 90;
+const NARROW_NUMBER_WIDTH = 65;
 
 /** Hidden copy of a fade layer used to measure text width without affecting layout. */
 const createProbe = (container: HTMLElement, layerClass: string): HTMLElement => {

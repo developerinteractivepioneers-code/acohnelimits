@@ -12,9 +12,10 @@ waiting for the user to hit **Generate Driving Statistics**.
   into place. Values are drawn log-uniformly from each metric's range, so
   small and large numbers appear about equally often.
 - **Fit to value** – the right column is only as wide as the current number
-  and unit. The map always spans from the card edge to the divider at a fixed
-  height, so it is pulled wider for short values and squeezed back for long
-  ones, animated in step with the cross-fade.
+  and unit. The map keeps its size and position and is clipped at the
+  divider, so for short values the divider wipes right and reveals more
+  terrain, animated in step with the cross-fade. Layout, type and the streak
+  geometry follow the static Figma states.
 - **Shooting stars** – thin red streaks appear low over the digits, rise
   slowly, decelerate and burn out (pure CSS keyframes). They are positioned
   inside the number box, so they follow its width; over short numbers every
@@ -58,8 +59,7 @@ npm run build
 
 ## Notes
 
-- `public/assets/map.png` is stretched between 158 and 247 px width at
-  160 px height (`--map-height` in `src/style.css`); supply it at least at
-  2× that size.
-- The font stack falls back to Helvetica/Arial; swap `--font-sans` in
-  `src/style.css` for the brand font.
+- `public/assets/map.png` is the Figma export, downscaled to 2× of its
+  243 × 196 px slot.
+- The font stack falls back to Helvetica/Arial; the design uses Porsche Next,
+  which is narrower. Load it and the number and button widths match Figma.
