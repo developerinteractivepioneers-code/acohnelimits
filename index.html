@@ -8,7 +8,7 @@
   </head>
   <body>
     <main class="stage">
-      <section class="teaser" data-teaser data-value="2168" data-min="100" data-max="50000" data-unit="km">
+      <section class="teaser" data-teaser data-value="2168">
         <div class="teaser__visual">
           <img
             class="teaser__map"
@@ -36,7 +36,17 @@
             <p class="visually-hidden" data-announce aria-live="polite"></p>
           </div>
         </div>
-        <p class="teaser__claim">Ready to drive to your numbers?</p>
+        <p class="teaser__claim" data-claim>Ready to drive to your numbers?</p>
+        <script type="application/json" data-metrics>
+          [
+            { "claim": "Ready to explore your kilometres?", "unit": "km", "min": 100, "max": 50000 },
+            { "claim": "Ready to explore your routes?", "unit": "", "min": 1, "max": 150 },
+            { "claim": "Ready to explore your curves?", "unit": "", "min": 50, "max": 20000 },
+            { "claim": "Ready to explore your driving time?", "unit": "h", "min": 1, "max": 800 },
+            { "claim": "Ready to explore your lateral G?", "unit": "g", "min": 0.3, "max": 1.2, "decimals": 1 },
+            { "claim": "Ready to explore your elevation gain?", "unit": "m", "min": 100, "max": 60000 }
+          ]
+        </script>
         <button class="teaser__cta" type="button" data-generate>Generate Driving Statistics</button>
       </section>
       <button class="stage__reset" type="button" data-reset>Reset demo</button>

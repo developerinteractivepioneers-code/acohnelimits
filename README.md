@@ -5,13 +5,16 @@ waiting for the user to hit **Generate Driving Statistics**.
 
 ## Behaviour
 
-- **Idle** – the number softly cross-fades to a new random distance every few
-  seconds: the old value drifts up and blurs out while the new one rises into
-  place. Values are drawn log-uniformly from `data-min`…`data-max`, so three-,
-  four- and five-digit distances appear about equally often.
+- **Idle** – the card cycles through a list of metrics (distance, routes,
+  curves, driving time, lateral G, elevation gain). For each one a random
+  value, its unit and its claim ("Ready to explore your curves?") cross-fade
+  in together: the old text drifts up and blurs out while the new one rises
+  into place. Values are drawn log-uniformly from each metric's range, so
+  small and large numbers appear about equally often.
 - **Shooting stars** – thin red streaks appear low, rise slowly, decelerate
   and burn out (pure CSS keyframes).
-- **Generate** – the counter fades to the final value from `data-value`.
+- **Generate** – fades to the final value from `data-value` on the first
+  metric and stops.
 - **Reduced motion** – with `prefers-reduced-motion: reduce` the final number
   is rendered statically and the streaks are drawn once.
 - Cycling pauses while the card is off-screen.
@@ -19,13 +22,25 @@ waiting for the user to hit **Generate Driving Statistics**.
 ## Usage
 
 ```html
-<section class="teaser" data-teaser data-value="2168" data-min="100" data-max="50000" data-unit="km">…</section>
+<section class="teaser" data-teaser data-value="2168">
+  …
+  <p class="teaser__claim" data-claim>Ready to drive to your numbers?</p>
+  <script type="application/json" data-metrics>
+    [
+      { "claim": "Ready to explore your kilometres?", "unit": "km", "min": 100, "max": 50000 },
+      { "claim": "Ready to explore your lateral G?", "unit": "g", "min": 0.3, "max": 1.2, "decimals": 1 }
+    ]
+  </script>
+  …
+</section>
 ```
 
-`data-value` is the final number, `data-min`/`data-max` the range the idle
-values are drawn from (digits only, thousands separator is added), `data-unit`
-the unit label. See `index.html` for the full markup, `src/teaser.ts` for the
-component and `src/counter.ts` for the cross-fade logic.
+Each metric has a `claim`, a `unit` (empty for plain counts), the `min`/`max`
+range idle values are drawn from and optional `decimals`. Numbers are
+formatted with a thousands dot and a decimal comma. `data-value` is the final
+number shown after the click. See `index.html` for the full markup,
+`src/teaser.ts` for the component, `src/fade-text.ts` for the cross-fade and
+`src/metrics.ts` for parsing and formatting.
 
 ## Development
 

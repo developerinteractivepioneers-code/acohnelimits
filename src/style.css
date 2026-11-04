@@ -84,13 +84,6 @@ body {
   height: 100%;
 }
 
-.teaser__claim {
-  margin: 28px 0 20px;
-  text-align: center;
-  font-size: 15px;
-  color: var(--color-text-muted);
-}
-
 .teaser__cta {
   display: block;
   width: 100%;
@@ -169,11 +162,67 @@ body {
   }
 }
 
-/* Cross-fading number -------------------------------------------------------- */
+/* Cross-fading text ---------------------------------------------------------- */
+
+:root {
+  --fade-duration: 1s;
+}
+
+/* Two layers share one grid cell; the container keeps the taller one's height. */
+.fade {
+  display: inline-grid;
+}
+
+.fade__layer {
+  grid-area: 1 / 1;
+  opacity: 0;
+  will-change: opacity, transform, filter;
+}
+
+.fade__layer.is-current {
+  opacity: 1;
+}
+
+/* Outgoing text drifts up and dissolves … */
+.fade__layer.is-leaving {
+  animation: fade-leave var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* … while the incoming one rises softly into place. */
+.fade__layer.is-entering {
+  animation: fade-enter var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes fade-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-0.3em);
+    filter: blur(5px);
+  }
+}
+
+@keyframes fade-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.3em);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+/* Number and unit ------------------------------------------------------------ */
 
 .odometer {
   --digit-size: 40px;
-  --fade-duration: 1s;
   position: absolute;
   left: 12px;
   right: 0;
@@ -189,72 +238,36 @@ body {
 }
 
 .counter {
-  position: relative;
-  display: inline-block;
   width: 4em; /* overwritten with the measured width of the widest value */
   height: 1em;
-  text-align: right;
+  justify-items: end;
   white-space: nowrap;
 }
 
 .counter__value {
-  position: absolute;
-  right: 0;
-  top: 0;
-  display: block;
   height: 1em;
   line-height: 1;
-  opacity: 0;
-  will-change: opacity, transform, filter;
-}
-
-.counter__value.is-current {
-  opacity: 1;
-}
-
-/* Outgoing value drifts up and dissolves … */
-.counter__value.is-leaving {
-  animation: value-leave var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-/* … while the incoming one rises softly into place. */
-.counter__value.is-entering {
-  animation: value-enter var(--fade-duration) cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes value-leave {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-0.3em);
-    filter: blur(5px);
-  }
-}
-
-@keyframes value-enter {
-  from {
-    opacity: 0;
-    transform: translateY(0.3em);
-    filter: blur(5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-    filter: blur(0);
-  }
 }
 
 .odometer__unit {
   flex: none;
+  min-width: 1.4em;
   margin-left: 0.25em;
   padding-bottom: 0.12em;
   font-size: 0.4em;
   font-weight: 400;
   line-height: 1;
+  color: var(--color-text-muted);
+}
+
+/* Claim ------------------------------------------------------------------------ */
+
+.teaser__claim {
+  display: grid;
+  justify-items: center;
+  margin: 28px 0 20px;
+  text-align: center;
+  font-size: 15px;
   color: var(--color-text-muted);
 }
 
@@ -272,8 +285,8 @@ body {
     opacity: 0.5;
   }
 
-  .counter__value.is-leaving,
-  .counter__value.is-entering {
+  .fade__layer.is-leaving,
+  .fade__layer.is-entering {
     animation: none;
   }
 
