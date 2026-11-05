@@ -1,13 +1,15 @@
 /**
  * Text that cross-fades between values.
  *
- * Two stacked layers share one grid cell and alternate: the current text
+ * Two stacked layers share one grid cell and alternate: the current content
  * drifts up and blurs out while the next one rises in from below.
  */
 
 const ENTER_CLASS = 'is-entering';
 const LEAVE_CLASS = 'is-leaving';
 const CURRENT_CLASS = 'is-current';
+
+export type FadeContent = string | Node;
 
 export class FadeText {
   readonly element: HTMLElement;
@@ -16,10 +18,10 @@ export class FadeText {
   private active = 0;
   private onEntered: (() => void) | null = null;
 
-  /** Turns `element` into a fade container; its text content becomes the first value. */
+  /** Turns `element` into a fade container; its existing children become the first value. */
   constructor(element: HTMLElement, layerClass: string) {
     this.element = element;
-    const initial = element.textContent?.trim() ?? '';
+    const initial = Array.from(element.childNodes);
     element.textContent = '';
     element.classList.add('fade');
 
@@ -27,7 +29,7 @@ export class FadeText {
     this.layers.forEach((layer) => element.appendChild(layer));
 
     const first = this.activeLayer();
-    first.textContent = initial;
+    initial.forEach((node) => first.appendChild(node));
     first.classList.add(CURRENT_CLASS);
   }
 
@@ -35,13 +37,13 @@ export class FadeText {
     return this.activeLayer().textContent ?? '';
   }
 
-  /** Cross-fade to `text`; `onEntered` fires once the new text is fully in. */
-  show(text: string, onEntered?: () => void): void {
+  /** Cross-fade to `content`; `onEntered` fires once the new content is fully in. */
+  show(content: FadeContent, onEntered?: () => void): void {
     const leaving = this.activeLayer();
     this.active = this.active === 0 ? 1 : 0;
     const entering = this.activeLayer();
 
-    entering.textContent = text;
+    fill(entering, content);
     this.onEntered = onEntered ?? null;
 
     leaving.classList.remove(CURRENT_CLASS, ENTER_CLASS);
@@ -50,15 +52,20 @@ export class FadeText {
     entering.classList.add(ENTER_CLASS, CURRENT_CLASS);
   }
 
-  /** Replace the text without any motion. */
-  set(text: string): void {
+  /** Replace the text of the current layer in place (used while counting up). */
+  updateCurrent(text: string): void {
+    this.activeLayer().textContent = text;
+  }
+
+  /** Replace the content without any motion. */
+  set(content: FadeContent): void {
     this.onEntered = null;
     this.layers.forEach((layer) => {
       layer.classList.remove(ENTER_CLASS, LEAVE_CLASS, CURRENT_CLASS);
       layer.textContent = '';
     });
     const layer = this.activeLayer();
-    layer.textContent = text;
+    fill(layer, content);
     layer.classList.add(CURRENT_CLASS);
   }
 
@@ -86,3 +93,12 @@ export class FadeText {
     return layer;
   }
 }
+
+const fill = (layer: HTMLElement, content: FadeContent): void => {
+  layer.textContent = '';
+  if (typeof content === 'string') {
+    layer.textContent = content;
+  } else {
+    layer.appendChild(content);
+  }
+};

@@ -125,6 +125,10 @@ body {
   color: var(--color-text);
 }
 
+.teaser__claim strong {
+  font-weight: 600;
+}
+
 .teaser__cta {
   display: block;
   width: 100%;
@@ -193,7 +197,7 @@ body {
   to {
     opacity: 0;
     transform: translateY(-0.3em);
-    filter: blur(5px);
+    filter: blur(4px);
   }
 }
 
@@ -201,7 +205,7 @@ body {
   from {
     opacity: 0;
     transform: translateY(0.3em);
-    filter: blur(5px);
+    filter: blur(4px);
   }
   to {
     opacity: 1;
@@ -247,27 +251,49 @@ body {
   line-height: 1;
 }
 
+/* Width and gap are set from JS and animate, so the number never jumps when
+   the unit changes length or disappears. */
 .odometer__unit {
+  --unit-gap-size: 5px;
   position: relative;
   flex: none;
-  margin-left: 5px;
+  width: var(--unit-width, auto);
+  margin-left: var(--unit-gap, var(--unit-gap-size));
+  justify-items: start;
+  overflow: visible;
   font-size: 15.6px;
   font-weight: 400;
   line-height: 1;
+  white-space: nowrap;
   color: var(--color-text-secondary);
+  transition:
+    width var(--fade-duration) var(--fade-easing),
+    margin-left var(--fade-duration) var(--fade-easing);
 }
 
 /* Shooting stars ------------------------------------------------------------ */
 
-/* Positioned inside the number box, so the streaks always sit over the digits. */
+/* Anchored to the right edge of the number box and as wide as the number
+   itself (set from JS, animated), so the streaks always sit over the digits
+   and glide with them instead of jumping when a layer is removed. */
 .bars {
   position: absolute;
-  inset: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--number-width, 100%);
   pointer-events: none;
+  transition: width var(--fade-duration) var(--fade-easing);
 }
 
-.is-narrow .bar[data-hide-narrow] {
-  display: none;
+.bars__tall {
+  position: absolute;
+  inset: 0;
+  transition: opacity var(--fade-duration) var(--fade-easing);
+}
+
+.is-narrow .bars__tall {
+  opacity: 0;
 }
 
 /*
@@ -308,6 +334,14 @@ body {
   }
 }
 
+/* First layout and reduced motion: no width transitions. */
+.is-static .teaser__stats,
+.is-static .bars,
+.is-static .bars__tall,
+.is-static .odometer__unit {
+  transition: none;
+}
+
 /* Reduced motion: static final number, streaks drawn once. */
 @media (prefers-reduced-motion: reduce) {
   .bar {
@@ -321,10 +355,10 @@ body {
     animation: none;
   }
 
-  .teaser__stats {
-    transition: none;
-  }
-
+  .teaser__stats,
+  .bars,
+  .bars__tall,
+  .odometer__unit,
   .teaser__cta {
     transition: none;
   }

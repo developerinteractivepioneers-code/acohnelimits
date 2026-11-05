@@ -3,8 +3,10 @@
  */
 
 export interface Metric {
-  /** Question shown below the visual, e.g. "Ready to explore your curves?" */
+  /** Question shown below the visual; `{entity}` is replaced by the bold entity. */
   readonly claim: string;
+  /** The emphasised part of the claim, e.g. "curves". */
+  readonly entity: string;
   /** Unit label next to the number; empty for plain counts. */
   readonly unit: string;
   /** Range random idle values are drawn from. */
@@ -15,22 +17,31 @@ export interface Metric {
 }
 
 export const DEFAULT_METRIC: Metric = {
-  claim: 'Ready to explore your kilometres?',
+  claim: 'Ready to explore your {entity}?',
+  entity: 'kilometres',
   unit: 'km',
   min: 100,
   max: 50000,
 };
 
-/** 2168 → "2.168", 0.8 → "0,8" (German/Swiss style separators). */
+/** 2168 → "2.168", 0.7 → "0.7" (thousands dot, decimal dot as in the design). */
 export const formatValue = (value: number, decimals = 0): string => {
   const [integer = '0', fraction] = value.toFixed(decimals).split('.');
   const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  return fraction ? `${grouped},${fraction}` : grouped;
+  return fraction ? `${grouped}.${fraction}` : grouped;
 };
 
-/** Widest string a metric can produce, for reserving layout width. */
-export const widestValue = (metric: Metric): string =>
-  formatValue(metric.max, metric.decimals).replace(/\d/g, '0');
+/** Builds the claim with the entity wrapped in <strong>. */
+export const renderClaim = (metric: Metric): DocumentFragment => {
+  const fragment = document.createDocumentFragment();
+  const [before = '', after = ''] = metric.claim.split('{entity}');
+  fragment.appendChild(document.createTextNode(before));
+  const strong = document.createElement('strong');
+  strong.textContent = metric.entity;
+  fragment.appendChild(strong);
+  fragment.appendChild(document.createTextNode(after));
+  return fragment;
+};
 
 /**
  * Log-uniform pick between min and max, so three-, four- and five-digit
@@ -42,6 +53,19 @@ export const randomValue = (metric: Metric): number => {
   const max = Math.max(metric.max, min);
   const picked = Math.exp(Math.log(min) + Math.random() * (Math.log(max) - Math.log(min)));
   return Number(picked.toFixed(decimals));
+};
+
+/**
+ * Value the count-up starts from: a bit below `value`, but with the same
+ * number of characters when formatted, so the digits never jump in width.
+ */
+export const countUpStart = (value: number, decimals = 0): number => {
+  const targetLength = formatValue(value, decimals).length;
+  let start = Number((value * 0.85).toFixed(decimals));
+  for (let i = 0; i < 8 && formatValue(start, decimals).length !== targetLength; i += 1) {
+    start = Number(((start + value) / 2).toFixed(decimals));
+  }
+  return formatValue(start, decimals).length === targetLength ? start : value;
 };
 
 /** Parses the JSON metric list embedded in the teaser markup. */
@@ -69,6 +93,7 @@ const isMetric = (candidate: unknown): candidate is Metric => {
   const record = candidate as Record<string, unknown>;
   return (
     typeof record['claim'] === 'string' &&
+    typeof record['entity'] === 'string' &&
     typeof record['unit'] === 'string' &&
     typeof record['min'] === 'number' &&
     typeof record['max'] === 'number' &&

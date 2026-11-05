@@ -7,10 +7,12 @@ waiting for the user to hit **Generate Driving Statistics**.
 
 - **Idle** – the card cycles through a list of metrics (distance, routes,
   curves, driving time, lateral G, elevation gain). For each one a random
-  value, its unit and its claim ("Ready to explore your curves?") cross-fade
+  value, its unit and its claim ("Ready to explore your **curves**?") cross-fade
   in together: the old text drifts up and blurs out while the new one rises
-  into place. Values are drawn log-uniformly from each metric's range, so
-  small and large numbers appear about equally often.
+  into place and counts up the last few percent to its value. Values are
+  drawn log-uniformly from each metric's range, so small and large numbers
+  appear about equally often. Every width that changes (stats column, unit,
+  streak area) is set explicitly and transitioned, so nothing snaps.
 - **Fit to value** – the right column is only as wide as the current number
   and unit. The map keeps its size and position and is clipped at the
   divider, so for short values the divider wipes right and reveals more
@@ -34,17 +36,18 @@ waiting for the user to hit **Generate Driving Statistics**.
   <p class="teaser__claim" data-claim>Ready to drive to your numbers?</p>
   <script type="application/json" data-metrics>
     [
-      { "claim": "Ready to explore your kilometres?", "unit": "km", "min": 100, "max": 50000 },
-      { "claim": "Ready to explore your lateral G?", "unit": "g", "min": 0.3, "max": 1.2, "decimals": 1 }
+      { "claim": "Ready to explore your {entity}?", "entity": "kilometres", "unit": "km", "min": 100, "max": 50000 },
+      { "claim": "Ready to explore your {entity}?", "entity": "lateral G", "unit": "g", "min": 0.3, "max": 1.2, "decimals": 1 }
     ]
   </script>
   …
 </section>
 ```
 
-Each metric has a `claim`, a `unit` (empty for plain counts), the `min`/`max`
-range idle values are drawn from and optional `decimals`. Numbers are
-formatted with a thousands dot and a decimal comma. `data-value` is the final
+Each metric has a `claim` with an `{entity}` placeholder, the `entity` that is
+rendered bold, a `unit` (empty for plain counts), the `min`/`max` range idle
+values are drawn from and optional `decimals`. Numbers are formatted with a
+thousands dot; decimals use a dot as in the design. `data-value` is the final
 number shown after the click. See `index.html` for the full markup,
 `src/teaser.ts` for the component, `src/fade-text.ts` for the cross-fade and
 `src/metrics.ts` for parsing and formatting.
